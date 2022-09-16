@@ -4,12 +4,10 @@
 *  No part of this assignment has been copied manually or electronically from any other source
 *  (including web sites) or distributed to other students.
 * 
-*  Name: ____Huijin Zheng________ Student ID: _109363176________ Date: ___9/16/2022________
+*  Name: ____Huijin Zheng________ Student ID: _109363176________ Date: ___9/16/2022____
 *  Cyclic Link: __https://creepy-pig-scrubs.cyclic.app/__________________
 *
 ********************************************************************************/ 
-
-// Setup
 const express = require('express');
 const cors = require('cors');
 const MoviesDB = require("./modules/moviesDB.js");
@@ -21,61 +19,68 @@ app.use(cors());
 app.use(express.json());
 
 
-// ROUTES Deliver the app's home page to browser clients
+
 app.get('/', (req, res) => {
-  res.json({ message: 'API Listening' });
+  res.status(201).json({ message: 'API Listening' });
 });
 
+
+
 // Add new
-app.post('/api/movies', async(req, res) => {
-  await db.addNewMovie(req.body);
-  res.json({message: `New movie added`});  
+app.post('/api/movies', (req, res) => {
+  db.addNewMovie(req.body).then(()=>{
+    res.status(201).json("Movie added");
+  }).catch(()=>{
+    res.status(500).json({message:"ERROR"});
+  })
 });
 
 // Get all
-app.get('/api/movies', async(req, res) => {
-  const data = await db.getAllMovies();
-  res.json(data);
+app.get('/api/movies', (req, res) => {
+  db.getAllMovies(req.query.page,req.query.perPage, req.query.title).then((data)=>{
+    if(data.length === 0)
+      res.status(204).json({message:"Data not found"});
+    else
+      res.status(201).json(data);
+  })
+  .catch((err)=>{
+    res.status(500).json({message:err.message});
+  });
 });
 
 // Get one
-app.get('/api/movies/:id', async(req,res) => {
-  try {
-    const data = await db.getMovieById(req.params.id);
-    res.json(data);
-  } catch(err) {
-    res.status(400).json({message: err});
-  }
+app.get('/api/movies/:_id', (req,res) => {
+  db.getMovieById(req.params._id).then((data)=>{
+    res.status(201).json(data);
+  }).catch(()=>{
+    res.status(500).json({message:"ERROR"});
+  });
 });
 
 // Edit existing
-app.put('/api/movies/:id', async(req, res) => {
-  try {
-    await db.updateMovieById(req.params.id, req.body);
-    res.json({message: "Movie updated"});
-  } catch {
-    res.status(400).json({message: err});
-  }
+app.put('/api/movies/:_id', (req, res) => {
+    
+    db.updateMovieById(req.body,req.params._id).then(()=>{
+      res.status(201).json({message:"MOVIE UPDATED"});
+    }).catch(()=>{
+      res.status(500).json({message:ERROR});
+    });
 });
 
 // Delete item
-app.delete('/api/movies/:id', async(req, res) => {
-  try {
-    await db.deleteMovieById(req.params.id);
-    res.json({message: "Movie deleted"});
-  } catch(err) {
-    res.status(404).json({message: err});
-  }
+app.delete('/api/movies/:_id', (req, res) => {
+
+    db.deleteMovieById(req.params._id).then(()=>{
+      res.status(201).json({message: "Movie deleted"});
+    })
+    .catch(()=> {
+    res.status(500).json({message: "ERROR"});
+  });
 });
 
 
-// Resource not found (this should be at the end)
-app.use((req, res) => {
-  res.status(404).json({message: "404 - Resource not found"});
-});
 
-
-// "Initializing" the Module & start the server
+//Initializing
 db.initialize(process.env.MONGODB_CONN_STRING).then(()=>{
   app.listen(HTTP_PORT, ()=>{
     console.log(`server listening on: ${HTTP_PORT}`);
