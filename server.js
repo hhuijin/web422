@@ -1,3 +1,14 @@
+/*********************************************************************************
+*  WEB422 – Assignment 1
+*  I declare that this assignment is my own work in accordance with Seneca  Academic Policy.  
+*  No part of this assignment has been copied manually or electronically from any other source
+*  (including web sites) or distributed to other students.
+* 
+*  Name: ____Huijin Zheng________ Student ID: _109363176________ Date: ___9/16/2022________
+*  Cyclic Link: _______________________________________________________________
+*
+********************************************************************************/ 
+
 // Setup
 const express = require('express');
 const cors = require('cors');
